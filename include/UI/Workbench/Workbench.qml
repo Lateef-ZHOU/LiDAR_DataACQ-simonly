@@ -22,9 +22,31 @@ WorkbenchWindow {
 
     SimGimbalSimOnlyModule { id: simGimbal }
     SimCardSimOnlyModule { id: simCard; gimbal: simGimbal.family }
-    FixedTaskSimOnlyModule { id: fixedTask; gimbal: simGimbal.family; card: simCard.family }
-    CycleTaskSimOnlyModule { id: cycleTask; gimbal: simGimbal.family; card: simCard.family }
-    SnakeTaskSimOnlyModule { id: snakeTask; gimbal: simGimbal.family; card: simCard.family }
+    // 参数在创建期交入；未选中的页面保留显式默认值，不自动启动。
+    FixedTaskSimOnlyModule {
+        id: fixedTask
+        gimbal: simGimbal.family; card: simCard.family
+        azimuths: root.startupRequest?.kind === "fixedAxis" ? root.startupRequest.azimuths : [0]
+        elevation: root.startupRequest?.kind === "fixedAxis" ? root.startupRequest.elevation : 60
+        accum: root.startupRequest?.kind === "fixedAxis" ? root.startupRequest.accumulate : settingsParameters.accumDefault
+        settle: root.startupRequest?.kind === "fixedAxis" ? root.startupRequest.settle : settingsParameters.settleDefault
+    }
+    CycleTaskSimOnlyModule {
+        id: cycleTask
+        gimbal: simGimbal.family; card: simCard.family
+        azimuths: root.startupRequest?.kind === "cycleAxis" ? root.startupRequest.azimuths : [0, 90, 180, 270]
+        elevation: root.startupRequest?.kind === "cycleAxis" ? root.startupRequest.elevation : 60
+        accum: root.startupRequest?.kind === "cycleAxis" ? root.startupRequest.accumulate : settingsParameters.accumDefault
+        settle: root.startupRequest?.kind === "cycleAxis" ? root.startupRequest.settle : settingsParameters.settleDefault
+    }
+    SnakeTaskSimOnlyModule {
+        id: snakeTask
+        gimbal: simGimbal.family; card: simCard.family
+        azimuths: root.startupRequest?.kind === "snakeAxis" ? root.startupRequest.azimuths : [0, 90, 180, 270]
+        elevation: root.startupRequest?.kind === "snakeAxis" ? root.startupRequest.elevation : 60
+        accum: root.startupRequest?.kind === "snakeAxis" ? root.startupRequest.accumulate : settingsParameters.accumDefault
+        settle: root.startupRequest?.kind === "snakeAxis" ? root.startupRequest.settle : settingsParameters.settleDefault
+    }
     SimulationSession {
         id: session
         gimbalPage: simGimbal

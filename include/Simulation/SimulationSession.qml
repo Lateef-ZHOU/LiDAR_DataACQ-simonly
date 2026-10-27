@@ -35,10 +35,6 @@ QtObject {
         if (startupRequest) {
             pendingTask = startupRequest.kind === "fixedAxis" ? fixedTask
                 : startupRequest.kind === "cycleAxis" ? cycleTask : snakeTask
-            pendingTask.accum = startupRequest.accumulate
-            pendingTask.settle = startupRequest.settle
-            pendingTask.planPage.elevation = startupRequest.elevation
-            pendingTask.planPage.azimuths = startupRequest.azimuths
         }
         initialized = true
         if (!(gimbalPage.open() && cardPage.open())) {
@@ -52,7 +48,7 @@ QtObject {
         const task = pendingTask
         pendingTask = null
         activeTask = task
-        if (!task.start(task.planPage.azimuths, task.planPage.elevation)) {
+        if (!task.start()) {
             activeTask = null
             exitRequested(1)
         } else {

@@ -6,6 +6,7 @@
 #include <QTest>
 #include <QDir>
 #include <QJsonArray>
+#include <QJSValue>
 #include "Device/GMB/Sim/SimGimbalDevice.h"
 #include "Device/DAQ/Sim/SimCardDevice.h"
 #include "Task/TaskBase.h"

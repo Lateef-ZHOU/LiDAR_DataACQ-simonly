@@ -24,7 +24,7 @@ FetchContent_Declare(lidar_chartcore
     BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/modules/ChartCore")
 FetchContent_Declare(lidar_taskcore
     GIT_REPOSITORY https://github.com/Lateef-ZHOU/TaskCore.git
-    GIT_TAG 04b7279ba5d03396729f28aa9a717ff6785f7041
+    GIT_TAG a830298848737d33a8b451fb91ea18dce308a8a5
     BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/modules/TaskCore")
 FetchContent_Declare(lidar_simgimbaldevice
     GIT_REPOSITORY https://github.com/Lateef-ZHOU/SimGimbalDevice.git
@@ -36,15 +36,15 @@ FetchContent_Declare(lidar_simcarddevice
     BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/modules/SimCardDevice")
 FetchContent_Declare(lidar_fixedtask
     GIT_REPOSITORY https://github.com/Lateef-ZHOU/FixedTask.git
-    GIT_TAG 705bafae11bb51efbac587012d4b8017e77cec36
+    GIT_TAG 813781be6a37bfe69bb2ed118f0999f3bbc057f1
     BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/modules/FixedTask")
 FetchContent_Declare(lidar_cycletask
     GIT_REPOSITORY https://github.com/Lateef-ZHOU/CycleTask.git
-    GIT_TAG a96dfa44ea56ce9e57cac86ab23b6665a83e6ded
+    GIT_TAG 26fca00a09e67f3dacd71e37d41806b64725aeff
     BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/modules/CycleTask")
 FetchContent_Declare(lidar_snaketask
     GIT_REPOSITORY https://github.com/Lateef-ZHOU/SnakeTask.git
-    GIT_TAG 48d25657e69d693277d59fa44fa8395ae7857143
+    GIT_TAG 0696e7deb4df14c5d704e72715a0b96ecbe5b8c2
     BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/modules/SnakeTask")
 FetchContent_MakeAvailable(lidar_handle_core lidar_algorithm lidar_devicecore lidar_uicore lidar_chartcore lidar_taskcore lidar_simgimbaldevice lidar_simcarddevice lidar_fixedtask lidar_cycletask lidar_snaketask)
 set(sim_modules Lidar::UICore Lidar::ChartCore Lidar::TaskUI Lidar::SimGimbalDevice

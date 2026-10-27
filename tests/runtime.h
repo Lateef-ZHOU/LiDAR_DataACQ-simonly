@@ -90,8 +90,8 @@ inline int runtimeProbe(const QString &directory)
     for (const auto *kind : {"fixedAxis", "cycleAxis", "snakeAxis"}) {
         auto saved = config.load(false, error);
         if (!saved) return 2;
-        QVariantList azimuths = QString::fromLatin1(kind) == "fixedAxis" ? QVariantList{0.0} : QVariantList{0.0, 90.0, 180.0, 270.0};
-        const QVariantMap request{{"kind", kind}, {"elevation", 60.0}, {"azimuths", azimuths}, {"accumulate", 1}, {"settle", 2}};
+        QVariantList azimuths = QString::fromLatin1(kind) == "fixedAxis" ? QVariantList{15.0} : QVariantList{15.0, 105.0, 195.0, 285.0};
+        const QVariantMap request{{"kind", kind}, {"elevation", 55.0}, {"azimuths", azimuths}, {"accumulate", 1}, {"settle", 3}};
         QQmlApplicationEngine engine;
         engine.setInitialProperties({{"configurationFile", QVariant::fromValue(&config)}, {"initialConfiguration", *saved}, {"startupRequest", request}});
         engine.loadFromModule("Lidar.SimOnly", "Workbench");
@@ -103,6 +103,17 @@ inline int runtimeProbe(const QString &directory)
         QString moduleName = taskName; moduleName[0] = moduleName[0].toUpper(); moduleName += "TaskSimOnlyModule";
         auto *module = root->findChild<QObject *>(moduleName);
         auto *task = module->findChild<TaskBase *>();
+        // 在处理任何排队初始化/连接消息之前，页面必须已经显示命令行给出的值。
+        auto *plan = module->property("planPage").value<QObject *>();
+        const auto angleProperty = plan->property("azimuths");
+        const auto uiAngles = angleProperty.metaType() == QMetaType::fromType<QJSValue>()
+            ? angleProperty.value<QJSValue>().toVariant().toList() : angleProperty.toList();
+        check("CLI parameters initialize the plan during construction",
+            plan->property("elevation").toDouble() == request.value("elevation").toDouble()
+            && uiAngles == azimuths && module->property("accum").toInt() == 1
+            && module->property("settle").toInt() == 3 && !task->running());
+        check("task commands are parameterless", module->metaObject()->indexOfMethod("start()") >= 0
+            && module->metaObject()->indexOfMethod("stop()") >= 0);
         check("CLI window stays hidden", !root->property("visible").toBool());
         QSignalSpy swaps(qobject_cast<QQuickWindow *>(root), &QQuickWindow::frameSwapped);
         QSignalSpy spectra(card, &SimCardDevice::specReady);

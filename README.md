@@ -79,6 +79,7 @@ Linux 执行 `./build/LiDAR_DataACQ`，Windows 在 Qt 运行环境执行 `build/
 - [SimGimbalDevice](https://github.com/Lateef-ZHOU/SimGimbalDevice)、[SimCardDevice](https://github.com/Lateef-ZHOU/SimCardDevice)：各自两套 QML 页面和唯一型号实现。
 - [FixedTask](https://github.com/Lateef-ZHOU/FixedTask)、[CycleTask](https://github.com/Lateef-ZHOU/CycleTask)、[SnakeTask](https://github.com/Lateef-ZHOU/SnakeTask)：各自两套页面、计划与独立协程。
 - TaskCore 的 `SimOnlyTaskModule` / `SimOnlyTaskRunSection` 为可选参考 UI；核心仍不依赖 QML。
+- simonly 任务官邸创建时必须接收 `azimuths/elevation/accum/settle`；命令行直接初始化被选中的页面，未选中的页面显式使用默认值。启动编排只等待设备就绪后调用无参 `start()`，不再事后改写计划；停止统一调用无参 `stop()`。角度 alias 到唯一计划，时间由页面持有，开始按钮与自动启动共用同一入口。
 - 所有依赖固定完整提交，见 `cmake/Dependencies.cmake`。不复制算法、设备或协程源码，不追踪浮动分支。
 
 详细测试入口见 [tests/README.md](tests/README.md)，实际执行结果见 [VALIDATION.md](VALIDATION.md)。MIT，版权 2026 周涛（ZHOU TAO）；第三方依赖另见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。Docker 的 Ubuntu 用户空间和 Qt 6.11.2 独立依赖层保留，宿主不需要使用 Ubuntu。
