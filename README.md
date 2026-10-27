@@ -81,4 +81,4 @@ Linux 执行 `./build/LiDAR_DataACQ`，Windows 在 Qt 运行环境执行 `build/
 - TaskCore 的 `SimOnlyTaskModule` / `SimOnlyTaskRunSection` 为可选参考 UI；核心仍不依赖 QML。
 - 所有依赖固定完整提交，见 `cmake/Dependencies.cmake`。不复制算法、设备或协程源码，不追踪浮动分支。
 
-详细测试入口见 [tests/README.md](tests/README.md)。MIT，版权 2026 周涛（ZHOU TAO）；第三方依赖另见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。Docker 的 Ubuntu 用户空间和 Qt 6.11.2 独立依赖层保留，宿主不需要使用 Ubuntu。
+详细测试入口见 [tests/README.md](tests/README.md)，实际执行结果见 [VALIDATION.md](VALIDATION.md)。MIT，版权 2026 周涛（ZHOU TAO）；第三方依赖另见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。Docker 的 Ubuntu 用户空间和 Qt 6.11.2 独立依赖层保留，宿主不需要使用 Ubuntu。

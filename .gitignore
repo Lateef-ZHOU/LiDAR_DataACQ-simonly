@@ -1,6 +1,7 @@
 /build*/
 /out/
 /dist/
+/docker/archives/
 /simulation.json
 /Rawspec/
 /Radialwind/
