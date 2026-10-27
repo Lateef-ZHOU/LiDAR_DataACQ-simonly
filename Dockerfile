@@ -4,10 +4,13 @@ FROM ubuntu:24.04@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f57
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates fonts-noto-cjk libdbus-1-3 libegl1 libfontconfig1 \
     libgl1 libopengl0 libgomp1 libglib2.0-0t64 libgssapi-krb5-2 \
-    libxkbcommon0 libxcb-cursor0 libssl3t64 \
+    libxkbcommon0 libxcb-cursor0 libssl3t64 libx11-xcb1 libxkbcommon-x11-0 \
+    libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxcb-shape0 \
+    libsm6 libice6 libgl1-mesa-dri libglx-mesa0 libegl-mesa0 \
     && rm -rf /var/lib/apt/lists/*
 ENV LANG=C.UTF-8 \
-    QT_QPA_PLATFORM=offscreen \
+    QSG_RHI_BACKEND=opengl \
+    LIBGL_ALWAYS_SOFTWARE=1 \
     LD_LIBRARY_PATH=/opt/Qt/lib
 
 # Qt 官方 Linux x86_64 归档固定版本及 SHA256，宿主 Qt 不参与构建。
@@ -38,6 +41,8 @@ RUN mkdir -p /runtime/Qt/lib /runtime/Qt/plugins/platforms /runtime/lidar/bin \
     && cp -a /opt/Qt/qml /runtime/Qt/ \
     && cp -a /opt/Qt/plugins/imageformats /opt/Qt/plugins/iconengines /runtime/Qt/plugins/ \
     && cp -a /opt/Qt/plugins/platforms/libqoffscreen.so /runtime/Qt/plugins/platforms/ \
+    && cp -a /opt/Qt/plugins/platforms/libqxcb.so /runtime/Qt/plugins/platforms/ \
+    && cp -a /opt/Qt/plugins/xcbglintegrations /runtime/Qt/plugins/ \
     && cp /build/LiDAR_DataACQ /runtime/lidar/bin/ \
     && printf '[Paths]\nPrefix=/opt/Qt\n' > /runtime/lidar/bin/qt.conf \
     && cp /tmp/qt-fetch/qt-6.11.2.lock /runtime/Qt/
@@ -48,6 +53,8 @@ COPY --from=build /runtime/lidar/ /opt/lidar/
 COPY config/simulation.example.json /opt/lidar/share/simulation.example.json
 COPY LICENSE THIRD_PARTY_NOTICES.md README.md /opt/lidar/share/
 RUN mkdir /data && chown 1000:1000 /data \
+    && ! ldd /opt/Qt/plugins/platforms/libqxcb.so | grep 'not found' \
+    && ! ldd /opt/Qt/plugins/xcbglintegrations/libqxcb-glx-integration.so | grep 'not found' \
     && /opt/lidar/bin/LiDAR_DataACQ --version
 WORKDIR /data
 # 挂载宿主目录时通过 --user 指定目录所有者的 UID/GID。
@@ -59,6 +66,6 @@ CMD ["--help"]
 FROM runtime AS final
 ARG VCS_REF=unknown
 LABEL org.opencontainers.image.title="LiDAR DataACQ Simulation" \
-    org.opencontainers.image.version="1.2.0-simonly" \
+    org.opencontainers.image.version="1.2.1-simonly" \
     org.opencontainers.image.revision="${VCS_REF}" \
     io.lidar.qt.version="6.11.2"

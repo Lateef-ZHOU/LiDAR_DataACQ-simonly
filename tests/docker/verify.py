@@ -11,7 +11,7 @@ import time
 import uuid
 
 p = argparse.ArgumentParser()
-p.add_argument('--image', default='lidar-simonly:1.2.0')
+p.add_argument('--image', default='lidar-simonly:1.2.1')
 p.add_argument('--out', required=True)
 p.add_argument('--docker', default='docker', help='For example: sudo -n docker')
 a = p.parse_args()
@@ -56,7 +56,7 @@ for kind in ['fixedAxis', 'cycleAxis', 'snakeAxis', 'cancel-window']:
     angles = ['60', '0'] if task == 'fixedAxis' else ['60', '0', '90', '180', '270']
     call('run', '-d', '--name', name, '--user', f'{os.getuid()}:{os.getgid()}',
          '-v', f'{config}:/config/simulation.json:ro', '-v', f'{data}:/data', a.image,
-         '--config', '/config/simulation.json', '--'+task, *angles,
+         '--headless', '--config', '/config/simulation.json', '--'+task, *angles,
          '--accumulate', '30' if cancel else '1', '--settle', '2')
     try:
         deadline = time.monotonic() + (6 if cancel else 100)

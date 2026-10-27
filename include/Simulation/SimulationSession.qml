@@ -19,6 +19,7 @@ QtObject {
     property SimulationConfig configurationFile: null
     property var initialConfiguration: null
     property var startupRequest: null
+    property bool headless: false
     readonly property bool commandLine: startupRequest !== null
     property bool initialized: false
     property var pendingTask: null
@@ -52,7 +53,7 @@ QtObject {
             activeTask = null
             exitRequested(1)
         } else {
-            logMessage(qsTr("设备已就绪，%1已启动；Ctrl+C / SIGTERM 停止").arg(task.name))
+            logMessage(qsTr("设备已就绪，%1已启动；关闭窗口 / Ctrl+C / SIGTERM 停止").arg(task.name))
         }
     }
     function checkCompletion(): void {
@@ -60,7 +61,8 @@ QtObject {
         if (activeTask && !activeTask.running) {
             activeTask = null
             logMessage(qsTr("采集任务已结束"))
-            exitRequested(1)
+            // 桌面模式保留页面供查看和再次操作；无窗口任务结束则退出。
+            if (headless) exitRequested(1)
         }
     }
     function cancel(): void {

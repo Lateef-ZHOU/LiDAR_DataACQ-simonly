@@ -10,19 +10,22 @@ struct SimulationCommand
     QString config = QStringLiteral("simulation.json");
     bool explicitConfig = false;
     bool help = false, version = false;
+    bool headless = false;
     QVariantMap task;
 
     static QString usage()
     {
         return QStringLiteral(
-            "LiDAR_DataACQ [--config FILE] [TASK --accumulate SECONDS --settle SECONDS]\n"
+            "LiDAR_DataACQ [--config FILE] [--headless] [TASK --accumulate SECONDS --settle SECONDS]\n"
             "  --fixedAxis HEIGHT AZIMUTH\n"
             "  --cycleAxis HEIGHT AZIMUTH1 AZIMUTH2 AZIMUTH3 AZIMUTH4\n"
             "  --snakeAxis HEIGHT AZIMUTH1 AZIMUTH2 AZIMUTH3 AZIMUTH4\n"
             "Angles: world coordinates in degrees; height first.\n"
             "--accumulate: 1..3600 s (default 10); --settle: 2..600 s (default 2).\n"
             "No TASK: open the configuration UI and persist edits to JSON.\n"
-            "With TASK: run without a window until Ctrl+C/SIGTERM; save to current directory.\n"
+            "With TASK: show UI and start automatically when devices are ready; save to current directory.\n"
+            "--headless: run TASK without a window (requires TASK).\n"
+            "Close window / Ctrl+C / SIGTERM: stop tasks, then exit.\n"
             "Default config: ./simulation.json (created if missing). Explicit FILE must exist.\n"
             "  --help  --version\n");
     }
@@ -38,6 +41,7 @@ struct SimulationCommand
             seen.append(option);
             if (option == "--help" || option == "-h") { result.help = true; continue; }
             if (option == "--version") { result.version = true; continue; }
+            if (option == "--headless") { result.headless = true; continue; }
             if (option == "--config") {
                 if (++i >= args.size() || args[i].isEmpty() || args[i].startsWith("--")) return fail(QStringLiteral("--config 缺少文件名"));
                 result.config = args[i]; result.explicitConfig = true; continue;
@@ -73,6 +77,8 @@ struct SimulationCommand
         }
         if (result.task.isEmpty() && (seen.contains("--accumulate") || seen.contains("--settle")))
             return fail(QStringLiteral("时间参数必须与采集任务一起指定"));
+        if (result.headless && result.task.isEmpty() && !result.help && !result.version)
+            return fail(QStringLiteral("--headless 必须与采集任务一起指定"));
         if (!result.task.isEmpty()) { result.task.insert("accumulate", accumulate); result.task.insert("settle", settle); }
         return result;
     }

@@ -26,6 +26,8 @@ result=subprocess.run([exe,'--help'],cwd=out,env=env,stdout=subprocess.PIPE,stde
 check('help documents height then azimuth',result.returncode==0 and b'--fixedAxis HEIGHT AZIMUTH' in result.stdout)
 
 def launch(args, folder, stdout, stderr):
+    if any(x in args for x in ('--fixedAxis', '--cycleAxis', '--snakeAxis')):
+        args = ['--headless', *args]
     options = {}
     if os.name == 'nt':
         startup = subprocess.STARTUPINFO()

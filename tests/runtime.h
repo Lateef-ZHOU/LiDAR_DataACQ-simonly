@@ -1,4 +1,4 @@
-// 使用实际 simonly 页面和同一后端，覆盖 JSON、八种风场、隐藏采样与取消。
+// 使用实际 simonly 页面和同一后端，覆盖 JSON、创建参数、窗口/隐藏采样与取消。
 #include <csignal>
 #include <QThread>
 #include "Simulation/SimulationConfig.h"
@@ -40,13 +40,16 @@ inline int runtimeProbe(const QString &directory)
     check("CLI elevation precedes azimuth and timings separated", parsed && parsed->task.value("elevation").toDouble() == 60
         && parsed->task.value("azimuths").toList()[0].toDouble() == 15
         && parsed->task.value("accumulate").toInt() == 2 && parsed->task.value("settle").toInt() == 3);
+    check("task defaults to desktop UI", parsed && !parsed->headless);
+    const auto hidden = SimulationCommand::parse({"sim", "--headless", "--fixedAxis", "60", "0"}, error);
+    check("headless is an explicit independent option", hidden && hidden->headless);
     for (const auto &args : QList<QStringList>{
         {"sim", "--fixedAxis", "nan", "0"}, {"sim", "--fixedAxis", "60"},
         {"sim", "--fixedAxis", "60", "0", "--cycleAxis", "60", "0", "90", "180", "270"},
         {"sim", "--fixedAxis", "60", "0", "--accumulate", "0"},
         {"sim", "--fixedAxis", "60", "0", "--settle", "1"},
         {"sim", "--fixedAxis", "60", "0", "--accumulate", "1", "--accumulate", "2"},
-        {"sim", "--accumulate", "2"}, {"sim", "--fixedAxix", "60", "0"}})
+        {"sim", "--accumulate", "2"}, {"sim", "--fixedAxix", "60", "0"}, {"sim", "--headless"}})
         check("invalid CLI rejected", !SimulationCommand::parse(args, error));
     {
         QQmlApplicationEngine engine;
@@ -86,14 +89,16 @@ inline int runtimeProbe(const QString &directory)
             }
         check("configuration change not a task", !gimbal->device().isLocked() && !card->device().isLocked());
     }
-    // 新引擎从 JSON 恢复，无窗口运行；先累积后停止，验证已有取消链及锁释放。
+    // 两种显示模式均从同一 JSON 和创建参数启动，随后经现有取消链释放锁。
+    for (const bool headless : {true, false})
     for (const auto *kind : {"fixedAxis", "cycleAxis", "snakeAxis"}) {
         auto saved = config.load(false, error);
         if (!saved) return 2;
         QVariantList azimuths = QString::fromLatin1(kind) == "fixedAxis" ? QVariantList{15.0} : QVariantList{15.0, 105.0, 195.0, 285.0};
         const QVariantMap request{{"kind", kind}, {"elevation", 55.0}, {"azimuths", azimuths}, {"accumulate", 1}, {"settle", 3}};
         QQmlApplicationEngine engine;
-        engine.setInitialProperties({{"configurationFile", QVariant::fromValue(&config)}, {"initialConfiguration", *saved}, {"startupRequest", request}});
+        engine.setInitialProperties({{"configurationFile", QVariant::fromValue(&config)}, {"initialConfiguration", *saved},
+                                     {"startupRequest", request}, {"headless", headless}});
         engine.loadFromModule("Lidar.SimOnly", "Workbench");
         if (engine.rootObjects().isEmpty()) return 2;
         auto *root = engine.rootObjects().front();
@@ -114,26 +119,43 @@ inline int runtimeProbe(const QString &directory)
             && module->property("settle").toInt() == 3 && !task->running());
         check("task commands are parameterless", module->metaObject()->indexOfMethod("start()") >= 0
             && module->metaObject()->indexOfMethod("stop()") >= 0);
-        check("CLI window stays hidden", !root->property("visible").toBool());
+        check("window visibility follows display mode, not task presence", root->property("visible").toBool() != headless);
         QSignalSpy swaps(qobject_cast<QQuickWindow *>(root), &QQuickWindow::frameSwapped);
         QSignalSpy spectra(card, &SimCardDevice::specReady);
         check("automatic task start after device readiness", QTest::qWaitFor([&] { return task->running(); }, 5000));
         check("persisted scene restored before sampling", card->seed() == 19 && card->temperature() == 25
             && static_cast<WindFieldSource *>(card->fieldSource())->temporal() == 3);
-        check("headless angle and scene histories produce spectrum", QTest::qWaitFor([&] { return !spectra.empty(); }, 15000));
+        check("angle and scene histories produce spectrum in either display mode", QTest::qWaitFor([&] { return !spectra.empty(); }, 15000));
         const auto surfaces = visualItems<SurfaceItem>(qobject_cast<QQuickWindow *>(root)->contentItem());
-        check("hidden task receives spectra without rendering or preparing surfaces", swaps.empty() && !surfaces.empty()
-            && std::all_of(surfaces.begin(), surfaces.end(), [](auto *surface) { return surface->surface().revision == 0; }));
+        if (headless)
+            check("hidden task receives spectra without rendering or preparing surfaces", swaps.empty() && !surfaces.empty()
+                && std::all_of(surfaces.begin(), surfaces.end(), [](auto *surface) { return surface->surface().revision == 0; }));
+        else
+            check("visible task presents updated surface", QTest::qWaitFor([&] {
+                return !swaps.empty() && std::any_of(surfaces.begin(), surfaces.end(),
+                    [](auto *surface) { return surface->surface().revision > 0; });
+            }, 2000));
         const auto persisted = readBytes();
         ProcessSignals signals;
         bool mainThread = false;
+        const int expectedSignal = !headless && QString::fromLatin1(kind) == "cycleAxis" ? SIGINT : SIGTERM;
         QObject::connect(&signals, &ProcessSignals::requested, root, [&, root](int code) {
-            mainThread = code == SIGTERM && QThread::currentThread() == qApp->thread();
+            mainThread = code == expectedSignal && QThread::currentThread() == qApp->thread();
             QMetaObject::invokeMethod(root, "stopSession");
         });
         QSignalSpy exited(root, SIGNAL(exitRequested(int)));
-        std::raise(SIGTERM);
-        check("SIGTERM delivered to main thread", QTest::qWaitFor([&] { return mainThread; }, 1000));
+        if (!headless && QString::fromLatin1(kind) == "fixedAxis") {
+            QMetaObject::invokeMethod(module, "stop");
+            QTest::qWait(50);
+            check("desktop stop button keeps UI available", !task->running() && exited.empty() && root->property("visible").toBool());
+            bool restarted = false;
+            QMetaObject::invokeMethod(module, "start", Q_RETURN_ARG(bool, restarted));
+            check("desktop task can restart through parameterless command", restarted && task->running());
+            qobject_cast<QQuickWindow *>(root)->close();
+        } else {
+            std::raise(expectedSignal);
+            check("OS signal delivered to main thread", QTest::qWaitFor([&] { return mainThread; }, 1000));
+        }
         check("cancel before event loop exit and release locks", !task->running() && !card->device().isLocked() && !gimbal->device().isLocked()
             && exited.count() == 1 && exited[0][0].toInt() == 0);
         check("CLI does not rewrite settings", readBytes() == persisted);

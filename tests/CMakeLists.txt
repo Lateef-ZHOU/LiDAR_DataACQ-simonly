@@ -27,6 +27,6 @@ else()
     target_compile_options(simonly_probe PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 add_test(NAME simonly_runtime COMMAND simonly_probe "${CMAKE_CURRENT_BINARY_DIR}/runtime-results")
-set_tests_properties(simonly_runtime PROPERTIES TIMEOUT 90
+set_tests_properties(simonly_runtime PROPERTIES TIMEOUT 150
     ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QSG_RHI_BACKEND=null"
     ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>")

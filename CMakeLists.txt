@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(LiDAR_DataACQ_simonly VERSION 1.2.0 LANGUAGES CXX)
+project(LiDAR_DataACQ_simonly VERSION 1.2.1 LANGUAGES CXX)
 set(LIDAR_VERSION_STRING "${PROJECT_VERSION}-simonly")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -21,8 +21,10 @@ if(WIN32)
     configure_file(src/version.rc.in "${CMAKE_CURRENT_BINARY_DIR}/version.rc" @ONLY)
     target_sources(LiDAR_DataACQ PRIVATE src/LiDAR_DataACQ.rc "${CMAKE_CURRENT_BINARY_DIR}/version.rc")
     set(LIDAR_FONT_FAMILY "Microsoft YaHei UI")
+    set(LIDAR_CONTROLS_STYLE "FluentWinUI3")
 else()
     set(LIDAR_FONT_FAMILY "Noto Sans CJK SC")
+    set(LIDAR_CONTROLS_STYLE "Fusion")
 endif()
 qt_add_qml_module(LiDAR_DataACQ URI Lidar.SimOnly VERSION 1.0 RESOURCE_PREFIX /qt/qml
     OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Lidar/SimOnly"

@@ -1,7 +1,7 @@
-; 控件字体与 main 中的应用字体共用 CMake 的平台字体选择。
+; 应用入口选择平台控件风格；字体与 main 共用同一 CMake 配置。
 [Controls]
-Style=FluentWinUI3
+Style=@LIDAR_CONTROLS_STYLE@
 
-[FluentWinUI3]
+[@LIDAR_CONTROLS_STYLE@]
 Font\Family=@LIDAR_FONT_FAMILY@
 Font\PointSize=10
