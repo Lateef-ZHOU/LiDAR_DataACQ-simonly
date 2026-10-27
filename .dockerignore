@@ -1,0 +1,17 @@
+**
+!Dockerfile
+!LICENSE
+!THIRD_PARTY_NOTICES.md
+!README.md
+!.dockerignore
+!CMakeLists.txt
+!cmake/
+!cmake/**
+!docker/
+!docker/**
+!src/
+!src/**
+!include/
+!include/**
+!config/
+!config/simulation.example.json

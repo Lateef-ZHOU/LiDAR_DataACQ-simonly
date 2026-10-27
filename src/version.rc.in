@@ -1,0 +1,31 @@
+// 版本资源模板：CMake 用 project(VERSION) 与变体后缀 configure 成 build/version.rc，exe 的属性页、打包脚本都从它读版本号。
+// 版本号只写在 CMakeLists.txt 的 project(VERSION ...) 一处；变体后缀（如 -sim）由各变体分支的 CMakeLists 设。
+#pragma code_page(65001)
+#include <windows.h>
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION    @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,0
+ PRODUCTVERSION @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,0
+ FILEFLAGSMASK  VS_FFI_FILEFLAGSMASK
+ FILEFLAGS      0
+ FILEOS         VOS_NT_WINDOWS32
+ FILETYPE       VFT_APP
+ FILESUBTYPE    VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080404B0"
+        BEGIN
+            VALUE "FileDescription",  "LiDAR 数据采集系统"
+            VALUE "FileVersion",      "@LIDAR_VERSION_STRING@"
+            VALUE "ProductName",      "LiDAR_DataACQ"
+            VALUE "ProductVersion",   "@LIDAR_VERSION_STRING@"
+            VALUE "InternalName",     "LiDAR_DataACQ"
+            VALUE "OriginalFilename", "LiDAR_DataACQ.exe"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 1200
+    END
+END

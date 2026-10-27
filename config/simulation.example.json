@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "gimbal": {
+    "mounting": { "azimuthDeg": 0, "elevationDeg": 0, "rollDeg": 0 },
+    "panSpeedDegS": 30,
+    "tiltSpeedDegS": 20
+  },
+  "field": {
+    "kind": "uniform",
+    "speedMS": 10,
+    "directionDeg": 270,
+    "verticalMS": 0,
+    "speedGainMSPerKm": 5,
+    "directionGainDegPerKm": 30,
+    "topM": 3000,
+    "temporal": "steady",
+    "swingSpeedMS": 3,
+    "swingDirectionDeg": 20,
+    "periodS": 60,
+    "rampSpeedMS": 5,
+    "rampDirectionDeg": 90,
+    "rampDurationS": 600,
+    "gustSpeedMS": 1,
+    "gustDirectionDeg": 10,
+    "gustScaleS": 30
+  },
+  "detector": {
+    "cnrAt1kmDb": 10,
+    "extinctionDbPerKm": 2,
+    "overlapRangeM": 500,
+    "floorCounts": 2,
+    "peakWidthBins": 3,
+    "seed": 7,
+    "lowC": -20,
+    "highC": 40,
+    "dbPerDegBelow": 0.3,
+    "dbPerDegAbove": 0.5
+  },
+  "environment": { "temperatureC": 20 }
+}

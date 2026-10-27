@@ -1,0 +1,9 @@
+#include <QtQml/QQmlExtensionPlugin>
+Q_IMPORT_QML_PLUGIN(LidarUIPlugin)
+Q_IMPORT_QML_PLUGIN(LidarChartsPlugin)
+Q_IMPORT_QML_PLUGIN(LidarTaskUIPlugin)
+Q_IMPORT_QML_PLUGIN(LidarSimGimbalDevicePlugin)
+Q_IMPORT_QML_PLUGIN(LidarSimCardDevicePlugin)
+Q_IMPORT_QML_PLUGIN(LidarFixedTaskPlugin)
+Q_IMPORT_QML_PLUGIN(LidarCycleTaskPlugin)
+Q_IMPORT_QML_PLUGIN(LidarSnakeTaskPlugin)
