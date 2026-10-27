@@ -6,14 +6,14 @@
     "tiltSpeedDegS": 20
   },
   "field": {
-    "kind": "uniform",
+    "kind": "linearShear",
     "speedMS": 10,
     "directionDeg": 270,
     "verticalMS": 0,
     "speedGainMSPerKm": 5,
     "directionGainDegPerKm": 30,
     "topM": 3000,
-    "temporal": "steady",
+    "temporal": "gust",
     "swingSpeedMS": 3,
     "swingDirectionDeg": 20,
     "periodS": 60,

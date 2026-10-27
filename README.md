@@ -6,6 +6,8 @@
 
 ## Docker 快速使用
 
+使用离线交付包时，直接按 [交付部署说明](docker/delivery/README.md) 解压、导入和启动，无需克隆或构建。包内 `start.sh` 会处理显示授权和 Docker 权限；本节保留源码构建入口。
+
 宿主需要 x86_64 Linux 和 Docker，不限定 Linux 发行版。桌面模式还需要已登录的本机 X11 桌面，或启用 XWayland 的 Wayland 桌面，以及 `xauth` 命令。镜像自带 Qt、字体和 Mesa OpenGL，默认由 CPU 渲染，不要求挂载 GPU 或安装实物设备驱动。首次构建需要联网下载 Qt 和固定版本的依赖仓库。
 
 ```sh
@@ -16,7 +18,9 @@ cp config/simulation.example.json simulation.json
 mkdir -p output
 ```
 
-修改 `simulation.json` 中的安装姿态、云台限速、风场、探测器和环境温度。所有字段均须保留；支持均匀/线性切变风场及稳态/正弦/过渡/阵风四种时间变化。参数不合法时启动失败，不静默采用默认值。命令行模式只读 JSON，修改后需重新启动。
+修改 `simulation.json` 中的安装姿态、云台限速、风场、探测器和环境温度。所有字段均须保留；支持匀强/线性剪切风场及定常/周期摆动/线性过渡/随机起伏四种时间变化。参数不合法时启动失败，不静默采用默认值。命令行模式只读 JSON，修改后需重新启动。
+
+新配置默认选择线性剪切与随机起伏（`linearShear` / `gust`），已有 JSON 不会被覆盖。
 
 在当前 Linux 桌面的终端运行，选择一种任务。启动脚本统一挂载当前目录的 `simulation.json`（只读）和 `output/`（可写），并只把当前显示连接的授权交给容器：
 

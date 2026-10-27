@@ -21,6 +21,9 @@ inline int runtimeProbe(const QString &directory)
     auto initial = config.load(true, error);
     check("default JSON created and validated", initial.has_value());
     if (!initial) return 2;
+    const auto defaultField = SimulationConfig::defaults().value("field").toObject();
+    check("fresh defaults use linear shear and random fluctuations",
+          defaultField.value("kind").toString() == "linearShear" && defaultField.value("temporal").toString() == "gust");
     SimulationConfig missing(output.absoluteFilePath("missing.json"));
     check("explicit missing JSON rejected", !missing.load(false, error));
     const auto readBytes = [&] { QFile f(config.path()); if (!f.open(QIODevice::ReadOnly)) return QByteArray{}; return f.readAll(); };
