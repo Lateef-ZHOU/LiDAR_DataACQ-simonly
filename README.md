@@ -6,7 +6,11 @@
 
 ## Docker 快速使用
 
-使用离线交付包时，直接按 [交付部署说明](docker/delivery/README.md) 解压、导入和启动，无需克隆或构建。包内 `start.sh` 会处理显示授权和 Docker 权限；本节保留源码构建入口。
+无桌面的服务器如需通过浏览器操作现有界面，使用独立的 [Web 版 Docker](docker/web/README.md)。它复用当前应用，容器内运行虚拟显示与 noVNC，启动即自动环形四轴采集并生成风廓线，默认采用局域网高画质设置；下方原桌面和无窗口交付入口继续保留。
+
+Web 独立离线包为 `LiDAR-simonly-1.2.1-linux-amd64-web.tar.gz`，按 [Web 离线部署说明](docker/web/delivery/README.md) 导入、启动和浏览器访问。完整镜像及基础层已随包提供，不依赖旧包；目标机预装 Docker 后不需联网。维护者使用 `bash docker/web/package.sh` 打包，输出到 `dist`。
+
+使用原桌面离线交付包时，直接按 [桌面交付部署说明](docker/delivery/README.md) 解压、导入和启动，无需克隆或构建。包内 `start.sh` 会处理显示授权和 Docker 权限；本节保留源码构建入口。
 
 宿主需要 x86_64 Linux 和 Docker，不限定 Linux 发行版。桌面模式还需要已登录的本机 X11 桌面，或启用 XWayland 的 Wayland 桌面，以及 `xauth` 命令。镜像自带 Qt、字体和 Mesa OpenGL，默认由 CPU 渲染，不要求挂载 GPU 或安装实物设备驱动。首次构建需要联网下载 Qt 和固定版本的依赖仓库。
 

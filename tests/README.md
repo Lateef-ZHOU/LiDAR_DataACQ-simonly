@@ -33,3 +33,30 @@ python3 tests/docker/verify.py --image lidar-simonly:1.2.1 --out build/docker-he
 `tests/desktop/Dockerfile` 仅提供独立的测试显示服务，不进入交付镜像。Xvfb 验证证明 X11 通道和软件 OpenGL 窗口可用，不能代替具体桌面合成器、原生 Wayland 或硬件 GPU 的实机验证。
 
 Qt 6.11.2 和本次原生环境的 Qt 6.12 qmllint 会把显式赋值的 required alias 误报为未赋值（任务的 azimuths/elevation）；独立最小例也可复现。本项目不抑制该类检查，也不为绕过检查增加参数副本；运行测试逐项验证省略必填参数拒绝创建、提供参数正确生效。其余静态告警仍应逐项处理。
+
+## Web 容器
+
+先按 `docker/web/README.md` 构建 Web 镜像，在无桌面的 Linux 服务器执行：
+
+```sh
+python3 tests/web/verify.py --docker 'sudo -n docker' --out build/web-results
+python3 tests/docker/verify.py --docker 'sudo -n docker' \
+  --image lidar-simonly-web:1.2.1 --out build/web-headless-results
+```
+
+专项核对应用二进制与桌面镜像完全相同；没有密码文件或密码环境变量仍正常启动，实际 RFB 握手无需密码；只发布浏览器端口，不挂载宿主显示/GPU；不传任务/时间参数即启动默认环形四轴并生成完整风廓线，检查高度网格和有效风速/风向数据；落地页使用画质 9/压缩 0、x11vnc 实际采用轮询/发送间隔；默认及三个显式任务无人连接时持续采样、谱数值与文件所有者、实际 OpenGL 曲面、四束风廓线；关窗、SIGINT、docker stop 和长累积取消正确转交原应用。截图和日志保留，测试创建的随机名容器在结束后删除。
+
+浏览器验证另外记录：免密码直达、页面切换、任务参数编辑与开始/停止；采集过程中断开和重新连接，比较容器 ID、应用 PID、任务状态及新增文件；在浏览器网络不可达期间确认仍持续落盘。更新默认启动策略时，另重启实际部署容器，核对新应用自动开始采集、浏览器自动重新连接及服务端协商的画质/压缩等级。HTTP 页面可达或 X11 截图不能代替这段实际操作。
+
+## Web 离线交付包
+
+在已构建 Web 镜像的 Linux 主机打包，再执行真实导入与启动验证。测试要求 Python 3.12+、`unshare`、`dockerd` 和免交互 sudo；输出目录必须尚不存在，磁盘需容纳解压镜像及临时 Docker 数据。
+
+```sh
+bash docker/web/package.sh
+python3 tests/web/delivery.py \
+  --archive dist/LiDAR-simonly-1.2.1-linux-amd64-web.tar.gz \
+  --out build/web-delivery-results
+```
+
+验证包内校验和、完整镜像层、空镜像库导入、缺少镜像时本地报错、禁用容器网络后默认环形生成完整 450 层风廓线、正常停止、任意工作目录运行包内入口及已有配置不被覆盖。独立 Docker 同时使用自己的数据目录、运行目录、containerd 命名空间和 `unshare --net` 网络命名空间；必须保留网络隔离，`--bridge=none` 本身仍可能让 dockerd 删除宿主的 docker0。包内脚本的端口访问在主 Docker 上使用随机容器名、独立状态目录和回环临时端口验证。结束只清理本测试创建的容器及已停止守护进程的临时数据，保留日志与采集证据。
